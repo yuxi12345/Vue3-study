@@ -1,133 +1,165 @@
 <template>
     <div>
-        <!-- <h1 v-if="h1Display" v-custom:parameter.click="message"> {{ message }}</h1>
-        <button @click="updateEl()">更新</button>
-        <button v-focus @click="unmountEl()">销毁</button>
+        <!-- 模板语法 文本插值 -->
+        <h1>{{ message }}</h1>
+        <!-- 模板语法 原始HTML -->
+        <!-- 模板语法 指令 v-show为例子 -->
+        <p v-show="true">使用文本插值： {{ rawHtml }}</p>
+        <p v-show="true">
+            使用原始HTML：
+            <span v-html="rawHtml"></span>
+        </p>
+        <!-- 指令：动态参数   v-bind指令  属性绑定 -->
+        <a :href="url">跳转学校官网</a>
+        <!-- v-on指令 dom事件 -->
+        <button @click="adjust()">调整</button>
+        <!-- v-bind指令  双大括号不可用于标签属性 -->
+        <div v-bind:id="apperance">Hello div</div>
+        <!-- 计数器 -->
+        <h1>{{ number }}</h1>
+        <button @click="calculate(1)">+1</button>
+        <button @click="calculate(2)">+2</button>
+        <button @click="calculate(-1)">-1</button>
+        <!-- 第三节课 -->
+        <!-- 使用js表达式 -->
         <div>
-            <input placeholder="Without focus" />
-            <input v-focus placeholder="With focus" />
-        </div> -->
-        <input
-            v-model="test"
-            v-debounce="{ func: newInput, delay: 3000 }" />
-        <input placeholder="With limit" v-model="test" v-limit:9 />
-    </div>
-    <hr />
-    <div>
-        <input v-model="who" placeholder="请输入人员身份" />
-        <table border="1">
-            <thead>
-                <tr>
-                    <th v-for="(column, key) in studentInfoKeys" :key="key">
-                        {{ column }}({{ key }})
-                    </th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="studentInfo in studentInfos" :key="studentInfo.id">
-                    <td v-for="(column, key) in studentInfoKeys" :key="key">
-                        <span v-if="column == '成绩'">
-                            <span v-show="studentInfo[key] >= 60">及格</span>
-                            <span v-show="studentInfo[key] < 60">挂科</span>
-                        </span>
-                        <span v-else>
-                            {{ studentInfo[key] }}
-                        </span>
-                    </td>
-                    <td>
-                        <!-- <button v-permission="who">查看</button>
-                        <button v-permission="who" style="color: blue;">修改</button>
-                        <button v-permission="who" style="color: red;">删除</button> -->
-                        <button v-auth="who">查看</button>
-                        <button v-auth="who" style="color: blue;">修改</button>
-                        <button v-auth="who" style="color: red;">删除</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+            {{ movieA.name }} 是
+            {{
+                movieA.shouzhong == '很广' && movieA.juqing == '有趣' && movieA.texiao == '绚丽'
+                    ? '成功的'
+                    : '一般的'
+            }}
+        </div>
+        <!-- 使用计算属性 -->
+        <div>{{ movieA.name }} 是 {{ movieEvaluation }}</div>
+        <!-- 使用方法 -->
+        <div>{{ movieA.name }} 是 {{ movieEvaluationFunc() }}</div>
+        <!-- 展示票房 -->
+        <h1>{{ movieA.piaofang }}</h1>
+        <!-- 调整按钮 -->
+        <button @click="movieA.piaofang = 200">调整1</button>
+        <button @click="movieA.shouzhong = '小朋友'">调整2</button>
+        <!-- 双向绑定 -->
+        <h1>{{ message }}</h1>
+        <input v-model="message" />
+        <!-- 习题 -->
+        <p>
+            语文：
+            <input type="number" v-model="chinese" />
+        </p>
+        <p>
+            数学：
+            <input type="number" v-model="math" />
+        </p>
+        <p>
+            英语：
+            <input type="number" v-model="english" />
+        </p>
+        <p>总分：{{ computedSummary }}</p>
+        <p>平均分：{{ computedAverage }}</p>
     </div>
 </template>
 
-<script>
-import { reactive, ref } from 'vue'
-import { onBeforeUpdate, onUpdated } from 'vue'
+<script setup>
+import { ref, reactive, computed } from 'vue'
+import {
+    onBeforeMount,
+    onMounted,
+    onBeforeUpdate,
+    onUpdated,
+    onBeforeUnmount,
+    onUnmounted
+} from 'vue'
+console.log('创建相关：setup')
+onBeforeMount(() => {
+    console.log('挂载之前...')
+})
 
-export default{
-    setup() {
-        const who = ref('')
-        const studentInfos = reactive([
-            { id: 2005001, name: '张三', live: '一善书院', score: 90 },
-            { id: 2005002, name: '李四', live: '双馨书院', score: 85 },
-            { id: 2005003, name: '王五', live: '三创书院', score: 61 },
-            { id: 2005004, name: '周六', live: '四实书院', score: 59 },
-            { id: 2005005, name: '郑七', live: '八方书院', score: 35 },
-            { id: 2005006, name: '王八', live: '拾德书院', score: 66 }
-        ])
-        const studentInfoKeys = reactive({
-            id: '学号',
-            name: '姓名',
-            live: '宿舍',
-            score: '成绩'
-        })
+onMounted(() => {
+    console.log('挂载完成之后...')
+})
 
-        const message = ref('Hello! My directive! ')
-        const h1Display = ref(true)
-        const test = ref('')
-        var timeout = null // 不需要响应式
+onBeforeUpdate(() => {
+    console.log('更新之前...')
+})
 
-        function newInput() {
-            // if (timeout) {
-            //     clearTimeout(timeout)
-            //     timeout = null
-            //     return
-            // }
-            // timeout = setTimeout(() => {
-            //     console.log(test.value)
-            // }, 2000);
-            console.log(test.value)
-        }
+onUpdated(() => {
+    console.log('更新之后')
+})
 
-        function updateEl() {
-            message.value += '!'
-        }
+onBeforeUnmount(() => {
+    console.log('卸载销毁之前')
+})
 
-        function unmountEl() {
-            h1Display.value = !h1Display.value
-        }
-        return {
-            who,
-            studentInfos,
-            studentInfoKeys,
-            test,
-            newInput
-        }
-    },
-    directives: {
-        auth: (el, binding) => {
-            const human = binding.value
-            const buttonType = el.innerText
-            if (human != 'teacher' && human != 'admin') {
-                // 非admin  非teacher 权限最低
-                if (buttonType == '修改' || buttonType == '删除') {
-                    // el.style.display = 'none'
-                    el.remove()
-                }
-            } else if (human == 'teacher') {
-                // teacher 权限有修改权限，无删除权限
-                if (buttonType == '删除') {
-                    // el.style.display = 'none'
-                    el.remove()
-                }
-                if (buttonType == '修改') {
-                    el.style.display = ''
-                }
-            } else {
-                // admin 拥有最高权限
-                el.style.display = ''
-            }
-        }
-    }
+onUnmounted(() => {
+    console.log('卸载销毁之后')
+})
+
+const computedSummary = computed(() => {
+    return chinese.value + math.value + english.value
+})
+
+const computedAverage = computed(() => {
+    return (chinese.value + math.value + english.value) / 3
+})
+
+const chinese = ref(0)
+const math = ref(0)
+const english = ref(0)
+const message = ref('Hello world')
+const rawHtml = ref('<span style="color: red">红色字体<span>')
+const url = ref('https://qvtu.edu.cn')
+const apperance = ref('handsome')
+const number = ref(0)
+const movieA = reactive({
+    name: '哪吒之魔童闹海',
+    shouzhong: '很广',
+    juqing: '有趣',
+    texiao: '绚丽',
+    piaofang: 100
+})
+
+const movieEvaluation = computed(() => {
+    console.log('计算属性被调用')
+    return movieA.shouzhong == '很广' && movieA.juqing == '有趣' && movieA.texiao == '绚丽'
+        ? '成功的'
+        : '一般的'
+})
+
+function movieEvaluationFunc() {
+    console.log('方法被调用')
+    return movieA.shouzhong == '很广' && movieA.juqing == '有趣' && movieA.texiao == '绚丽'
+        ? '成功的'
+        : '一般的'
 }
 
+console.log(movieEvaluation)
+console.log(movieEvaluation.value)
+
+// reactive声明响应式【非原始值】
+const originObj = {
+    student: 'qvtu',
+    year: 2024,
+    study: 'vue'
+}
+const originObjReactive = reactive(originObj)
+const originObjRef = ref(originObj)
+// console.log(originObj)
+// console.log(originObjReactive)
+// console.log(originObjRef)
+// console.log(originObjRef.value)
+// console.log(originObj == originObjReactive)
+
+// console.log(message)
+// console.log(message.value)
+
+function adjust() {
+    url.value = 'http://www.baidu.com'
+}
+
+function calculate(delta) {
+    number.value += delta
+}
 </script>
+
+<style scoped></style>
