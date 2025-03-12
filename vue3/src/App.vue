@@ -25,9 +25,9 @@
         <div>
             {{ movieA.name }} 是
             {{
-                movieA.shouzhong == '很广' && movieA.juqing == '有趣' && movieA.texiao == '绚丽'
-                    ? '成功的'
-                    : '一般的'
+            movieA.shouzhong == '很广' && movieA.juqing == '有趣' && movieA.texiao == '绚丽'
+            ? '成功的'
+            : '一般的'
             }}
         </div>
         <!-- 使用计算属性 -->
@@ -57,6 +57,31 @@
         </p>
         <p>总分：{{ computedSummary }}</p>
         <p>平均分：{{ computedAverage }}</p>
+
+        <!-- 第四次课 课堂作业 -->
+        <div>
+            <h1>学生列表</h1>
+            <table border="4">
+                <thead>
+                    <tr>
+                        <th>学号id</th>
+                        <th>姓名name</th>
+                        <th>宿舍live</th>
+                        <th>成绩score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="user in students" :key="user.id">
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.name }}</td>
+                        <td>{{ user.live }}</td>
+
+                        <td v-show="user.score <60">挂科</td>
+                        <td v-show="user.score >= 60">及格</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </template>
 
@@ -102,6 +127,14 @@ const computedSummary = computed(() => {
 const computedAverage = computed(() => {
     return (chinese.value + math.value + english.value) / 3
 })
+
+const students = reactive([
+    { id: 2025001, name: '张3', live: '一善书院', score: 90 },
+    { id: 2025002, name: '李四', live: '双馨书院', score: 85 },
+    { id: 2025003, name: '王五', live: '三创书院', score: 60 },
+    { id: 2025004, name: '周六', live: '四实书院', score: 58 },
+    { id: 2025005, name: '郑7', live: '师德书院', score: 15 },
+])
 
 const chinese = ref(0)
 const math = ref(0)
